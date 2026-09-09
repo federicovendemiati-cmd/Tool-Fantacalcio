@@ -18,7 +18,7 @@ def load_data():
 
 df_listone = load_data()
 
-# Caricamento del file delle probabili formazioni / ballottaggi
+# Caricamento del file delle probabili formazioni e ballottaggi (CSV)
 @st.cache_data
 def load_formazioni():
     if os.path.exists("probabili.csv"):
@@ -162,7 +162,7 @@ def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, pre
         return (f"🚨 **FOLLIA PURA!** Stai offrendo {prezzo_inserito} crediti per un {ruolo_gioc} ({int((prezzo_inserito/budget_iniziale)*100)}% del budget). "
                 f"Prezzo fuori da ogni logica, bloccati subito!"), "warning"
 
-    # Controllo incrociato sul file esterno delle probabili formazioni (probabili.csv)
+    # Controllo incrociato sul file CSV delle formazioni
     match_formazione = False
     if not df_formazioni.empty and "Nome" in df_formazioni.columns:
         gioc_formazione = df_formazioni[df_formazioni["Nome"].astype(str).str.lower() == str(nome_gioc).lower()]
@@ -170,7 +170,7 @@ def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, pre
             status = gioc_formazione.iloc[0].get("Status_Reale", "Titolare")
             ballottaggio = gioc_formazione.iloc[0].get("Ballottaggio_Con", "")
             
-            testo_consiglio.append(f"🔍 **SITUAZIONE REALE (probabili.csv):** Status: **{status}**.")
+            testo_consiglio.append(f"🔍 **SITUAZIONE REALE (CSV):** Status: **{status}**.")
             if ballottaggio and str(ballottaggio).lower() != "nan" and str(ballottaggio).strip() != "":
                 testo_consiglio.append(f"⚖️ **BALLOTTAGGIO ATTIVO:** È in ballottaggio con: *{ballottaggio}*.")
                 consiglio_colore = "warning"
@@ -179,7 +179,7 @@ def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, pre
             match_formazione = True
 
     if not match_formazione and fvm < 15 and squadra_ita in ["Inter", "Milan", "Juventus", "Napoli", "Atalanta", "Roma", "Lazio"]:
-        testo_consiglio.append(f"⚠️ **ATTENZIONE FORMAZIONE:** Giocatore economico ({fvm} FVM) in una big ({squadra_ita}) non censito nel file `probabili.csv`. Verifica se parte titolare.")
+        testo_consiglio.append(f"⚠️ **ATTENZIONE FORMAZIONE:** Giocatore economico ({fvm} FVM) in una big ({squadra_ita}) non censito nel file CSV. Verifica se parte titolare.")
 
     soglia_affare = min(fvm * 0.90, limite_assoluto_crediti * 0.6)
     soglia_max_onesta = min(fvm * 1.15, limite_assoluto_crediti * 0.85)
