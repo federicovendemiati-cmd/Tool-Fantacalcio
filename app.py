@@ -1,7 +1,7 @@
-import streamlit as st
-import pandas as pd
-import json
 import os
+import json
+import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction Master", page_icon="⚽", layout="wide")
 
@@ -17,6 +17,18 @@ def load_data():
         return pd.DataFrame(columns=["Ruolo", "Nome", "Squadra", "FVM", "Prezzo"])
 
 df_listone = load_data()
+
+# Caricamento del file delle probabili formazioni / ballottaggi
+@st.cache_data
+def load_formazioni():
+    if os.path.exists("probabili.csv"):
+        try:
+            return pd.read_csv("probabili.csv")
+        except:
+            return pd.DataFrame(columns=["Nome", "Status_Reale", "Ballottaggio_Con"])
+    return pd.DataFrame(columns=["Nome", "Status_Reale", "Ballottaggio_Con"])
+
+df_formazioni = load_formazioni()
 
 # Configurazione Dinamica Numero Partecipanti nella Sidebar
 st.sidebar.header("⚙️ Configurazione Lega")
@@ -123,7 +135,7 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegnazione Giocatore", type="primary")
 
-# --- MOTORE MASTER CON GERARCHIE E FORMAZIONI REALI ---
+# --- MOTORE MASTER CON LETTURA DEL FILE probabili.csv ---
 def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
     slot_occupati = sum(1 for g in st.session_state.rose[sq_target][ruolo_gioc] if g != "")
     slot_totali = SLOT_CONFIG[ruolo_gioc]
@@ -150,31 +162,24 @@ def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, pre
         return (f"🚨 **FOLLIA PURA!** Stai offrendo {prezzo_inserito} crediti per un {ruolo_gioc} ({int((prezzo_inserito/budget_iniziale)*100)}% del budget). "
                 f"Prezzo fuori da ogni logica, bloccati subito!"), "warning"
 
-    # Database integrato delle gerarchie e ballottaggi reali caldi nelle squadre di Serie A
-    # (Inserisci qui le chiavi dei giocatori per mappare esattamente la situazione reale)
-    gerarchie_reali = {
-        "bonny": "È riserva offensiva nell'Inter (chiuso da Lautaro, Thuram e Pio Esposito). Rischio minutaggio basso, valutane l'acquisto solo a pochissimi crediti.",
-        "taremi": "Prima alternativa offensiva dell'Inter. Vede spesso il campo ma parte spesso dietro la Thu-La.",
-        "frattesi": "Jolly di centrocampo nell'Inter, spesso arma a gara in corso o titolare in staffetta con Barella/Mkhitaryan.",
-        "isaksen": "In ballottaggio costante sulle fasce della Lazio. Richiede copertura.",
-        "castellanos": "Titolare nel duello offensivo della Lazio, ma gestito con rotazioni.",
-        "jovic": "Riserva offensiva nelle gerarchie del Milan.",
-        "simeone": "Vice Lukaku nel Napoli, minutaggio ridotto a meno di staffette o infortuni."
-    }
-
-    # Controllo match nel database reale
-    gioc_lower = nome_gioc.lower()
-    match_reale = False
-    for chiave, info in gerarchie_reali.items():
-        if chiave in gioc_lower:
-            testo_consiglio.append(f"🔍 **SITUAZIONE REALE (PROBABILI FORMAZIONI):** {info}")
-            if "riserva" in info.lower() or "ridotto" in info.lower():
-                consiglio_colore = "warning"
-            match_reale = True
-            break
+    # Controllo incrociato sul file esterno delle probabili formazioni (probabili.csv)
+    match_formazione = False
+    if not df_formazioni.empty and "Nome" in df_formazioni.columns:
+        gioc_formazione = df_formazioni[df_formazioni["Nome"].astype(str).str.lower() == str(nome_gioc).lower()]
+        if not gioc_formazione.empty:
+            status = gioc_formazione.iloc[0].get("Status_Reale", "Titolare")
+            ballottaggio = gioc_formazione.iloc[0].get("Ballottaggio_Con", "")
             
-    if not match_reale and fvm < 15 and squadra_ita in ["Inter", "Milan", "Juventus", "Napoli", "Atalanta", "Roma", "Lazio"]:
-        testo_consiglio.append(f"⚠️ **ATTENZIONE FORMAZIONE:** Essendo un profilo economico ({fvm} FVM) in una big ({squadra_ita}), verifica bene se è un titolare o una riserva designata nelle probabili formazioni reali.")
+            testo_consiglio.append(f"🔍 **SITUAZIONE REALE (probabili.csv):** Status: **{status}**.")
+            if ballottaggio and str(ballottaggio).lower() != "nan" and str(ballottaggio).strip() != "":
+                testo_consiglio.append(f"⚖️ **BALLOTTAGGIO ATTIVO:** È in ballottaggio con: *{ballottaggio}*.")
+                consiglio_colore = "warning"
+            elif "riserva" in str(status).lower() or "alternativa" in str(status).lower():
+                consiglio_colore = "warning"
+            match_formazione = True
+
+    if not match_formazione and fvm < 15 and squadra_ita in ["Inter", "Milan", "Juventus", "Napoli", "Atalanta", "Roma", "Lazio"]:
+        testo_consiglio.append(f"⚠️ **ATTENZIONE FORMAZIONE:** Giocatore economico ({fvm} FVM) in una big ({squadra_ita}) non censito nel file `probabili.csv`. Verifica se parte titolare.")
 
     soglia_affare = min(fvm * 0.90, limite_assoluto_crediti * 0.6)
     soglia_max_onesta = min(fvm * 1.15, limite_assoluto_crediti * 0.85)
