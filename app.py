@@ -34,20 +34,12 @@ SLOT_CONFIG = {
     "A": 6
 }
 
-# Inizializzazione dello stato nel session_state
+# Inizializzazione sicura dello stato nel session_state
 if "rose" not in st.session_state:
     st.session_state.rose = {}
+if "crediti" not in st.session_state:
     st.session_state.crediti = {}
-    for sq in squadre:
-        st.session_state.rose[sq] = {
-            "P": ["" for _ in range(SLOT_CONFIG["P"])],
-            "D": ["" for _ in range(SLOT_CONFIG["D"])],
-            "C": ["" for _ in range(SLOT_CONFIG["C"])],
-            "A": ["" for _ in range(SLOT_CONFIG["A"])]
-        }
-        st.session_state.crediti[sq] = budget_iniziale
 
-# Sincronizzazione in caso di modifiche ai nomi delle squadre
 for sq in squadre:
     if sq not in st.session_state.rose:
         st.session_state.rose[sq] = {
@@ -63,8 +55,9 @@ for sq in squadre:
 st.sidebar.markdown("---")
 st.sidebar.header("💰 Crediti Residui")
 for sq in squadre:
-    spesi = budget_iniziale - st.session_state.crediti[sq]
-    st.sidebar.text(f"{sq}: {st.session_state.crediti[sq]} cr (Spesi: {spesi})")
+    crediti_attuali = st.session_state.crediti.get(sq, budget_iniziale)
+    spesi = budget_iniziale - crediti_attuali
+    st.sidebar.text(f"{sq}: {crediti_attuali} cr (Spesi: {spesi})")
 
 # --- SEZIONE ASTA / ASSEGNAZIONE ---
 st.subheader("🛒 Assegnazione Giocatore")
@@ -115,22 +108,18 @@ with st.expander("🛠️ Correggi / Rimuovi un giocatore assegnato per errore")
     sq_err = st.selectbox("Seleziona Squadra", options=squadre, key="err_sq")
     ruolo_err = st.selectbox("Seleziona Ruolo", options=["P", "D", "C", "A"], key="err_ruolo")
     
-    # Elenca i giocatori attualmente in quel ruolo per quella squadra
     gioccorrenti = [g for g in st.session_state.rose[sq_err][ruolo_err] if g != ""]
     gioc_sel = st.selectbox("Seleziona giocatore da rimuovere", options=[""] + gioccorrenti, key="err_gioc")
     
     if st.button("Rimuovi e Rimborsa Crediti"):
         if gioc_sel:
-            # Estrae il prezzo dal formato "Nome (X cr)"
             try:
                 prezzo_estratto = int(gioc_sel.split("(")[1].split(" ")[0])
             except:
                 prezzo_estratto = 0
             
-            # Libera lo slot
             idx_to_clear = st.session_state.rose[sq_err][ruolo_err].index(gioc_sel)
             st.session_state.rose[sq_err][ruolo_err][idx_to_clear] = ""
-            # Rimborsa i crediti
             st.session_state.crediti[sq_err] += prezzo_estratto
             st.success(f"Rimosso {gioc_sel} da {sq_err} e rimborsati {prezzo_estratto} crediti!")
             st.rerun()
