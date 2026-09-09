@@ -15,13 +15,12 @@ ai_attiva = False
 if gemini_api_key:
     try:
         genai.configure(api_key=gemini_api_key)
-        # Aggiornato al modello attuale
         ai_model = genai.GenerativeModel('gemini-3.6-flash')
         ai_attiva = True
     except Exception as e:
         st.sidebar.error(f"Errore configurazione API: {e}")
 
-# Caricamento del listone
+# Caricamento del listone con cache
 @st.cache_data
 def load_data():
     try:
@@ -107,28 +106,41 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# Box Consigli IA in tempo reale per il giocatore selezionato
+# Funzione in cache per evitare chiamate doppie identiche e velocizzare la risposta
+@st.cache_data(show_spinner=False)
+def get_ai_advice(api_key, p_name, ruolo, squadra_ita, fvm, prezzo_cons, sq_acq, p_pagato, crediti_rim):
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-3.6-flash')
+    prompt = (
+        f"Fantacalcio: {p_name} ({ruolo}, {squadra_ita}). "
+        f"FVM {fvm}, Prezzo guida {prezzo_cons}. "
+        f"Offerta: {p_pagato} cr da {sq_acq} (ha {crediti_rim} cr residui). "
+        f"In 2 righe secche: affare o overpay? Consiglio rapido."
+    )
+    return model.generate_content(prompt).text
+
+# Mostra il consiglio in automatico e all'istante non appena selezioni il giocatore
 if search_name:
-    with st.expander("🤖 Analisi e Consiglio IA su questo Giocatore", expanded=True):
-        if ai_attiva:
-            with st.spinner("L'IA sta analizzando il giocatore e la situazione della lega..."):
+    if ai_attiva:
+        with st.spinner("⚡ IA in ascolto..."):
+            try:
                 crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
-                prompt = (
-                    f"Sei un esperto di Fantacalcio italiano. Stiamo facendo l'asta. "
-                    f"Il giocatore selezionato è {search_name}, Ruolo: {selected_player_row['Ruolo']}, "
-                    f"Squadra Serie A: {selected_player_row['Squadra']}, FVM: {selected_player_row['FVM']}, "
-                    f"Prezzo guida consigliato: {selected_player_row['Prezzo']}. "
-                    f"La squadra che lo sta acquistando ({squadra_acquirente}) ha ancora {crediti_rimasti_acquirente} crediti su {budget_iniziale} iniziali. "
-                    f"Il prezzo inserito per l'asta è {prezzo_pagato} crediti. "
-                    f"Fai un'analisi breve e pungente (massimo 3-4 righe): conviene prenderlo a questo prezzo? È un affare o un overpay? Che consigli dai a {squadra_acquirente}?"
+                consiglio = get_ai_advice(
+                    gemini_api_key, 
+                    search_name, 
+                    selected_player_row['Ruolo'], 
+                    selected_player_row['Squadra'], 
+                    selected_player_row['FVM'], 
+                    selected_player_row['Prezzo'], 
+                    squadra_acquirente, 
+                    prezzo_pagato, 
+                    crediti_rimasti_acquirente
                 )
-                try:
-                    response = ai_model.generate_content(prompt)
-                    st.success(response.text)
-                except Exception as e:
-                    st.error(f"Errore durante la generazione della risposta IA: {e}")
-        else:
-            st.info("💡 Inserisci la tua chiave API di Gemini nella barra laterale per sbloccare l'analisi e i consigli istantanei dell'IA.")
+                st.info(f"🤖 **Parere Flash IA:** {consiglio}")
+            except Exception as e:
+                st.error(f"Errore IA: {e}")
+    else:
+        st.warning("⚠️ Inserisci la tua chiave API di Gemini nella barra laterale per attivare il consulente.")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
