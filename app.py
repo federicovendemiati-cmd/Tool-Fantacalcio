@@ -3,8 +3,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction", page_icon="⚽", layout="wide")
 
-st.title("⚽ Tabellone Asta in Tempo Real")
-st.markdown("Cerca un giocatore dal listone e assegnalo direttamente alla squadra acquirente.")
+st.title("⚽ Tabellone Asta in Tempo Reale")
+st.markdown("Gestione rose, crediti e assegnazione automatica dei giocatori.")
 
 # Caricamento del listone
 @st.cache_data
@@ -16,9 +16,11 @@ def load_data():
 
 df_listone = load_data()
 
-# Configurazione Squadre nella Sidebar
+# Configurazione Squadre e Budget nella Sidebar
 st.sidebar.header("⚙️ Configurazione Lega")
 default_squadre = ["Fede", "Riky", "Gio", "Penno", "Ale", "Aldo", "Margy", "Lupo"]
+budget_iniziale = st.sidebar.number_input("Budget Iniziale per Squadra", value=500, step=50)
+
 squadre = []
 for i, nome_def in enumerate(default_squadre):
     s = st.sidebar.text_input(f"Squadra {i+1}", value=nome_def)
@@ -32,9 +34,10 @@ SLOT_CONFIG = {
     "A": 6
 }
 
-# Inizializzazione dello stato delle rose nel session_state
+# Inizializzazione dello stato nel session_state
 if "rose" not in st.session_state:
     st.session_state.rose = {}
+    st.session_state.crediti = {}
     for sq in squadre:
         st.session_state.rose[sq] = {
             "P": ["" for _ in range(SLOT_CONFIG["P"])],
@@ -42,8 +45,9 @@ if "rose" not in st.session_state:
             "C": ["" for _ in range(SLOT_CONFIG["C"])],
             "A": ["" for _ in range(SLOT_CONFIG["A"])]
         }
+        st.session_state.crediti[sq] = budget_iniziale
 
-# Se cambiano i nomi delle squadre o la lista, sincronizziamo lo stato
+# Sincronizzazione in caso di modifiche ai nomi delle squadre
 for sq in squadre:
     if sq not in st.session_state.rose:
         st.session_state.rose[sq] = {
@@ -52,6 +56,15 @@ for sq in squadre:
             "C": ["" for _ in range(SLOT_CONFIG["C"])],
             "A": ["" for _ in range(SLOT_CONFIG["A"])]
         }
+    if sq not in st.session_state.crediti:
+        st.session_state.crediti[sq] = budget_iniziale
+
+# --- PANNELLO CREDITI RESIDUI NELLA SIDEBAR ---
+st.sidebar.markdown("---")
+st.sidebar.header("💰 Crediti Residui")
+for sq in squadre:
+    spesi = budget_iniziale - st.session_state.crediti[sq]
+    st.sidebar.text(f"{sq}: {st.session_state.crediti[sq]} cr (Spesi: {spesi})")
 
 # --- SEZIONE ASTA / ASSEGNAZIONE ---
 st.subheader("🛒 Assegnazione Giocatore")
@@ -72,7 +85,7 @@ with col_search3:
     squadra_acquirente = st.selectbox("Assegna a Squadra", options=squadre)
 
 with col_search4:
-    st.text("") # Spaziatura
+    st.text("") 
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
@@ -80,17 +93,47 @@ if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
     nome_giocatore = f"{search_name} ({prezzo_pagato} cr)"
     
-    # Trova il primo slot libero per quel ruolo nella squadra scelta
-    slot_trovato = False
-    if ruolo in st.session_state.rose[squadra_acquirente]:
-        for idx, slot_val in enumerate(st.session_state.rose[squadra_acquirente][ruolo]):
-            if slot_val == "":
-                st.session_state.rose[squadra_acquirente][ruolo][idx] = nome_giocatore
-                slot_trovato = True
-                st.success(f"Assegnato {search_name} a {squadra_acquirente}!")
-                break
-        if not slot_trovato:
-            st.error(f"Tutti gli slot per il ruolo {ruolo} di {squadra_acquirente} sono pieni!")
+    # Controlla se la squadra ha abbastanza crediti
+    if st.session_state.crediti[squadra_acquirente] < prezzo_pagato:
+        st.error(f"{squadra_acquirente} non ha abbastanza crediti residui!")
+    else:
+        # Trova il primo slot libero per quel ruolo
+        slot_trovato = False
+        if ruolo in st.session_state.rose[squadra_acquirente]:
+            for idx, slot_val in enumerate(st.session_state.rose[squadra_acquirente][ruolo]):
+                if slot_val == "":
+                    st.session_state.rose[squadra_acquirente][ruolo][idx] = nome_giocatore
+                    st.session_state.crediti[squadra_acquirente] -= prezzo_pagato
+                    slot_trovato = True
+                    st.success(f"Assegnato {search_name} a {squadra_acquirente} per {prezzo_pagato} crediti!")
+                    break
+            if not slot_trovato:
+                st.error(f"Tutti gli slot per il ruolo {ruolo} di {squadra_acquirente} sono pieni!")
+
+# --- OPZIONE DI CORREZIONE / RIMOZIONE ACQUISTO ERRORE ---
+with st.expander("🛠️ Correggi / Rimuovi un giocatore assegnato per errore"):
+    sq_err = st.selectbox("Seleziona Squadra", options=squadre, key="err_sq")
+    ruolo_err = st.selectbox("Seleziona Ruolo", options=["P", "D", "C", "A"], key="err_ruolo")
+    
+    # Elenca i giocatori attualmente in quel ruolo per quella squadra
+    gioccorrenti = [g for g in st.session_state.rose[sq_err][ruolo_err] if g != ""]
+    gioc_sel = st.selectbox("Seleziona giocatore da rimuovere", options=[""] + gioccorrenti, key="err_gioc")
+    
+    if st.button("Rimuovi e Rimborsa Crediti"):
+        if gioc_sel:
+            # Estrae il prezzo dal formato "Nome (X cr)"
+            try:
+                prezzo_estratto = int(gioc_sel.split("(")[1].split(" ")[0])
+            except:
+                prezzo_estratto = 0
+            
+            # Libera lo slot
+            idx_to_clear = st.session_state.rose[sq_err][ruolo_err].index(gioc_sel)
+            st.session_state.rose[sq_err][ruolo_err][idx_to_clear] = ""
+            # Rimborsa i crediti
+            st.session_state.crediti[sq_err] += prezzo_estratto
+            st.success(f"Rimosso {gioc_sel} da {sq_err} e rimborsati {prezzo_estratto} crediti!")
+            st.rerun()
 
 st.markdown("---")
 
