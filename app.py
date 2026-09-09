@@ -7,12 +7,12 @@ st.set_page_config(page_title="Tool Fantacalcio - Live Auction con IA", page_ico
 st.title("⚽ Tabellone Asta in Tempo Reale + Consulente IA")
 st.markdown("Gestione rose, crediti, assegnazione automatica e consigli strategici in tempo reale.")
 
-# Configurazione API IA nella Sidebar
-st.sidebar.header("🤖 Configurazione IA")
-gemini_api_key = st.sidebar.text_input("Inserisci Gemini API Key", type="password", help="Incolla qui la tua chiave API di Google Gemini.")
-
+# Configurazione automatica della chiave API dai Secrets di Streamlit
 ai_attiva = False
-if gemini_api_key:
+gemini_api_key = None
+
+if "GEMINI_API_KEY" in st.secrets:
+    gemini_api_key = st.secrets["GEMINI_API_KEY"]
     try:
         genai.configure(api_key=gemini_api_key)
         ai_model = genai.GenerativeModel('gemini-3.6-flash')
@@ -31,7 +31,6 @@ def load_data():
 df_listone = load_data()
 
 # Configurazione Dinamica Numero Partecipanti nella Sidebar
-st.sidebar.markdown("---")
 st.sidebar.header("⚙️ Configurazione Lega")
 num_squadre = st.sidebar.slider("Numero di partecipanti", min_value=6, max_value=12, value=8)
 budget_iniziale = st.sidebar.number_input("Budget Iniziale per Squadra", value=500, step=50)
@@ -106,7 +105,7 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# Funzione in cache per evitare chiamate doppie identiche e velocizzare la risposta
+# Funzione in cache per velocizzare la risposta dell'IA
 @st.cache_data(show_spinner=False)
 def get_ai_advice(api_key, p_name, ruolo, squadra_ita, fvm, prezzo_cons, sq_acq, p_pagato, crediti_rim):
     genai.configure(api_key=api_key)
@@ -119,7 +118,7 @@ def get_ai_advice(api_key, p_name, ruolo, squadra_ita, fvm, prezzo_cons, sq_acq,
     )
     return model.generate_content(prompt).text
 
-# Mostra il consiglio in automatico e all'istante non appena selezioni il giocatore
+# Mostra il consiglio in automatico non appena selezioni il giocatore
 if search_name:
     if ai_attiva:
         with st.spinner("⚡ IA in ascolto..."):
@@ -140,7 +139,7 @@ if search_name:
             except Exception as e:
                 st.error(f"Errore IA: {e}")
     else:
-        st.warning("⚠️ Inserisci la tua chiave API di Gemini nella barra laterale per attivare il consulente.")
+        st.warning("⚠️ Chiave API non trovata nei secrets di Streamlit.")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
