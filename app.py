@@ -1,24 +1,10 @@
 import streamlit as st
 import pandas as pd
-import google.generativeai as genai
 
-st.set_page_config(page_title="Tool Fantacalcio - Live Auction con IA", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Tool Fantacalcio - Live Auction", page_icon="⚽", layout="wide")
 
-st.title("⚽ Tabellone Asta in Tempo Reale + Consulente IA")
-st.markdown("Gestione rose, crediti, assegnazione automatica e consigli strategici in tempo reale.")
-
-# Configurazione automatica della chiave API dai Secrets di Streamlit
-ai_attiva = False
-gemini_api_key = None
-
-if "GEMINI_API_KEY" in st.secrets:
-    gemini_api_key = st.secrets["GEMINI_API_KEY"]
-    try:
-        genai.configure(api_key=gemini_api_key)
-        ai_model = genai.GenerativeModel('gemini-3.6-flash')
-        ai_attiva = True
-    except Exception as e:
-        st.sidebar.error(f"Errore configurazione API: {e}")
+st.title("⚽ Tabellone Asta in Tempo Reale + Consulente Smart")
+st.markdown("Gestione rose, crediti, assegnazione automatica e consigli statistici istantanei.")
 
 # Caricamento del listone con cache
 @st.cache_data
@@ -82,8 +68,8 @@ for sq in squadre:
     spesi = budget_iniziale - crediti_attuali
     st.sidebar.text(f"{sq}: {crediti_attuali} cr (Spesi: {spesi})")
 
-# --- SEZIONE ASTA / ASSEGNAZIONE + CONSIGLI IA ---
-st.subheader("🛒 Assegnazione Giocatore & Consulente IA")
+# --- SEZIONE ASTA / ASSEGNAZIONE + CONSIGLI SMART ---
+st.subheader("🛒 Assegnazione Giocatore & Consulente Smart")
 col_search1, col_search2, col_search3, col_search4 = st.columns([2, 1, 1, 1])
 
 with col_search1:
@@ -105,41 +91,24 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# Funzione in cache per velocizzare la risposta dell'IA
-@st.cache_data(show_spinner=False)
-def get_ai_advice(api_key, p_name, ruolo, squadra_ita, fvm, prezzo_cons, sq_acq, p_pagato, crediti_rim):
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-3.6-flash')
-    prompt = (
-        f"Fantacalcio: {p_name} ({ruolo}, {squadra_ita}). "
-        f"FVM {fvm}, Prezzo guida {prezzo_cons}. "
-        f"Offerta: {p_pagato} cr da {sq_acq} (ha {crediti_rim} cr residui). "
-        f"In 2 righe secche: affare o overpay? Consiglio rapido."
-    )
-    return model.generate_content(prompt).text
-
-# Mostra il consiglio in automatico non appena selezioni il giocatore
-if search_name:
-    if ai_attiva:
-        with st.spinner("⚡ IA in ascolto..."):
-            try:
-                crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
-                consiglio = get_ai_advice(
-                    gemini_api_key, 
-                    search_name, 
-                    selected_player_row['Ruolo'], 
-                    selected_player_row['Squadra'], 
-                    selected_player_row['FVM'], 
-                    selected_player_row['Prezzo'], 
-                    squadra_acquirente, 
-                    prezzo_pagato, 
-                    crediti_rimasti_acquirente
-                )
-                st.info(f"🤖 **Parere Flash IA:** {consiglio}")
-            except Exception as e:
-                st.error(f"Errore IA: {e}")
+# Funzione di calcolo automatico istantaneo (Senza limiti e senza API)
+def calcola_consiglio_smart(fvm, prezzo_pagato, crediti_rimasti):
+    diff = prezzo_pagato - fvm
+    if prezzo_pagato <= fvm * 0.8:
+        return f"🔥 **Grande Affare!** Pagato {prezzo_pagato} rispetto a un FVM di {fvm} (-{abs(diff)} cr). Ottimo colpo."
+    elif prezzo_pagato <= fvm * 1.1:
+        return f"👍 **Prezzo onesto.** In linea con il valore di mercato (FVM: {fvm})."
+    elif prezzo_pagato <= fvm * 1.4:
+        return f"⚠️ **Leggero Overpay.** Lo stai pagando un po' sopra il valore ({prezzo_pagato} vs {fvm} FVM). Occhio ai crediti rimasti ({crediti_rimasti} cr)."
     else:
-        st.warning("⚠️ Chiave API non trovata nei secrets di Streamlit.")
+        return f"🚨 **Overpay Pesante!** Prezzo decisamente alto rispetto al listone (+{diff} cr). Rischio di prosciugare il budget."
+
+# Mostra il consiglio istantaneamente in base alle regole
+if search_name:
+    crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
+    fvm_giocatore = float(selected_player_row['FVM'])
+    giudizio = calcola_consiglio_smart(fvm_giocatore, prezzo_pagato, crediti_rimasti_acquirente)
+    st.info(f"🤖 **Analisi Smart:** {giudizio}")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
