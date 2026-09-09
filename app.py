@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import json
+import os
 
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction Master", page_icon="⚽", layout="wide")
 
@@ -36,11 +38,23 @@ SLOT_CONFIG = {
     "A": 6
 }
 
-# Inizializzazione sicura dello stato nel session_state
+# Inizializzazione e recupero persistente da file locale per non perdere i dati
 if "rose" not in st.session_state:
     st.session_state.rose = {}
 if "crediti" not in st.session_state:
     st.session_state.crediti = {}
+
+# Caricamento automatico da backup locale se esiste
+if "caricato_da_file" not in st.session_state:
+    if os.path.exists("backup_automatico.json"):
+        try:
+            with open("backup_automatico.json", "r") as f:
+                dati = json.load(f)
+                st.session_state.rose = dati.get("rose", {})
+                st.session_state.crediti = dati.get("crediti", {})
+        except:
+            pass
+    st.session_state.caricato_da_file = True
 
 for sq in squadre:
     if sq not in st.session_state.rose:
@@ -53,12 +67,23 @@ for sq in squadre:
     if sq not in st.session_state.crediti:
         st.session_state.crediti[sq] = budget_iniziale
 
+# Funzione per salvare automaticamente lo stato corrente su file
+def salva_stato_locale():
+    dati_salvataggio = {
+        "rose": st.session_state.rose,
+        "crediti": st.session_state.crediti
+    }
+    with open("backup_automatico.json", "w") as f:
+        json.dump(dati_salvataggio, f)
+
 # Pulizia delle squadre rimosse dallo stato se si riduce il numero
 for sq_esistente in list(st.session_state.rose.keys()):
     if sq_esistente not in squadre:
         del st.session_state.rose[sq_esistente]
         if sq_esistente in st.session_state.crediti:
             del st.session_state.crediti[sq_esistente]
+
+salva_stato_locale()
 
 # --- PANNELLO CREDITI E ANDAMENTO ASTA NELLA SIDEBAR ---
 st.sidebar.markdown("---")
@@ -67,7 +92,7 @@ st.sidebar.header("💰 Situazione Crediti & Asta")
 crediti_totali_lega = sum(st.session_state.crediti.values())
 budget_iniziale_totale = num_squadre * budget_iniziale
 crediti_spesi_totale = budget_iniziale_totale - crediti_totali_lega
-media_crediti_rimasti = crediti_totali_lega / num_squadre
+media_crediti_rimasti = crediti_totali_lega / num_squadre if num_squadre > 0 else 0
 
 st.sidebar.markdown(f"**Media crediti residui per squadra:** `{int(media_crediti_rimasti)} cr`")
 st.sidebar.markdown(f"**Totale crediti spesi nella lega:** `{crediti_spesi_totale} cr`")
@@ -101,67 +126,58 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# --- MOTORE MASTER DI ANALISI AVANZATA (RUOLO, ROSA E ANDAMENTO ASTA) ---
+# --- MOTORE MASTER DI ANALISI AVANZATA (CON TETTI DI BUDGET REALI) ---
 def master_analisi_asta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
-    # Controllo quanti slot liberi ha la squadra in quel ruolo
     slot_occupati = sum(1 for g in st.session_state.rose[sq_target][ruolo_gioc] if g != "")
     slot_totali = SLOT_CONFIG[ruolo_gioc]
     slot_rimasti = slot_totali - slot_occupati
     
-    crediti_miei = st.session_state.crediti[sq_target]
-    
-    # Calcolo soglia d'affare in base all'andamento dell'asta (se la media crediti degli avversari si abbassa, i prezzi calano)
-    soglia_affare = fvm * 0.85
-    soglia_max = fvm * 1.25
+    LIMITI_MASSIMI_PERCENTUALI = {
+        "P": 0.12,
+        "D": 0.16,
+        "C": 0.25,
+        "A": 0.45
+    }
+    limite_assoluto_crediti = budget_iniziale * LIMITI_MASSIMI_PERCENTUALI.get(ruolo_gioc, 0.20)
     
     consiglio_colore = "info"
     testo_consiglio = []
     
-    # 1. Analisi di Ruolo e Rosa
     if slot_rimasti <= 0:
-        return f"🚨 **Attenzione!** {sq_target} ha già completato tutti gli slot per il ruolo **{ruolo_gioc}**! Non puoi prenderlo a meno di svincolare qualcuno.", "error"
+        return f"🚨 **Attenzione!** {sq_target} ha già completato tutti gli slot per il ruolo **{ruolo_gioc}**!", "error"
     
     testo_consiglio.append(f"📋 **Slot {ruolo_gioc} liberi per {sq_target}:** {slot_rimasti}/{slot_totali}.")
     
-    # 2. Analisi Specifiche per Ruolo & Squadra
+    if prezzo_inserito > limite_assoluto_crediti:
+        return (f"🚨 **OVERPAY ENORME!** Stai spendendo **{prezzo_inserito} crediti** ({int((prezzo_inserito/budget_iniziale)*100)}% del tuo budget totale) per un **{ruolo_gioc}**. "
+                f"Soglia di buon senso superata per questo ruolo! Rischio squilibrio rosa."), "warning"
+
+    soglia_affare = min(fvm * 0.90, limite_assoluto_crediti * 0.6)
+    soglia_max_onesta = min(fvm * 1.15, limite_assoluto_crediti * 0.85)
+
     portieri_rosa = [g.split(" (")[0] for g in st.session_state.rose[sq_target]["P"] if g != ""]
     if ruolo_gioc == "P":
         squadre_portieri = [df_listone[df_listone["Nome"] == p].iloc[0]["Squadra"] for p in portieri_rosa if not df_listone[df_listone["Nome"] == p].empty]
         if squadra_ita in squadre_portieri:
-            testo_consiglio.append(f"🔥 **COPERTURA PORTA:** Hai già il titolare del **{squadra_ita}**! Prenderlo ti blinda la porta al 100%. Consigliatissimo se preso a basso costo.")
-        else:
-            testo_consiglio.append(f"🧤 **Portiere singolo ({squadra_ita}).** Valuta la rotazione del calendario con i tuoi attuali portieri.")
+            testo_consiglio.append(f"🔥 **COPERTURA PORTA:** Hai già il titolare del **{squadra_ita}**!")
             
     elif ruolo_gioc == "D":
         if squadra_ita in ["Inter", "Juventus", "Milan", "Atalanta", "Napoli"]:
-            testo_consiglio.append(f"🛡️ **Top Difesa ({squadra_ita}):** Ottimale per il modificatore di difesa. Se pagato entro **{int(fvm * 1.15)} crediti** è un affare solido.")
-        else:
-            testo_consiglio.append(f"⚽ Difensore da bonus o titolare low-cost per completare il reparto.")
-            
-    elif ruolo_gioc == "C":
-        testo_consiglio.append(f"🎯 Centrocampista da modificatore/bonus. Monitora il budget: ti restano {crediti_miei} crediti.")
-        
-    elif ruolo_gioc == "A":
-        if fvm >= 100:
-            testo_consiglio.append(f"👑 **TOP ATTACCO:** Giocatore fondamentale. Gestisci bene il budget residuo ({crediti_miei} cr) perché gli slot avanzati pesano molto.")
-        else:
-            testo_consiglio.append(f"⚡ Scommessa o titolare di provincia per completare il tridente.")
+            testo_consiglio.append(f"🛡️ Top difesa ({squadra_ita}) per il modificatore.")
 
-    # 3. Analisi del Prezzo rispetto all'Andamento dell'Asta
     diff = prezzo_inserito - fvm
     if prezzo_inserito <= soglia_affare:
-        testo_consiglio.append(f"💰 **GRANDE AFFARE!** Lo stai pagando {prezzo_inserito} rispetto a un FVM di {fvm} (-{abs(int(diff))} cr). Prendi al volo!")
+        testo_consiglio.append(f"💰 **GRANDE AFFARE!** Pagato {prezzo_inserito} rispetto al FVM di {fvm}.")
         consiglio_colore = "success"
-    elif prezzo_inserito <= soglia_max:
-        testo_consiglio.append(f"👍 **Prezzo onesto e in linea** con l'andamento della lega (FVM: {fvm}).")
+    elif prezzo_inserito <= soglia_max_onesta:
+        testo_consiglio.append(f"👍 **Prezzo onesto** in linea con il valore (FVM: {fvm}).")
         consiglio_colore = "info"
     else:
-        testo_consiglio.append(f"⚠️ **OVERPAY!** Lo stai pagando troppo rispetto al valore medio (+{int(diff)} cr). Con una media lega di {int(media_crediti_rimasti)} cr residui per squadra, rischi di rimanere corto.")
+        testo_consiglio.append(f"⚠️ **LEGGERO OVERPAY:** Stai pagando {prezzo_inserito} un giocatore con FVM {fvm}.")
         consiglio_colore = "warning"
         
     return " ".join(testo_consiglio), consiglio_colore
 
-# Mostra il consiglio dinamico in tempo reale
 if search_name:
     parere, tipo_box = master_analisi_asta(
         squadra_acquirente, 
@@ -193,12 +209,12 @@ if assegna_btn and search_name:
                     st.session_state.rose[squadra_acquirente][ruolo][idx] = nome_giocatore
                     st.session_state.crediti[squadra_acquirente] -= prezzo_pagato
                     slot_trovato = True
+                    salva_stato_locale()
                     st.success(f"Assegnato {search_name} a {squadra_acquirente} per {prezzo_pagato} crediti!")
                     break
             if not slot_trovato:
                 st.error(f"Tutti gli slot per il ruolo {ruolo} di {squadra_acquirente} sono pieni!")
 
-# --- OPZIONE DI CORREZIONE / RIMOZIONE ACQUISTO ERRORE ---
 with st.expander("🛠️ Correggi / Rimuovi un giocatore assegnato per errore"):
     sq_err = st.selectbox("Seleziona Squadra", options=squadre, key="err_sq")
     ruolo_err = st.selectbox("Seleziona Ruolo", options=["P", "D", "C", "A"], key="err_ruolo")
@@ -216,12 +232,12 @@ with st.expander("🛠️ Correggi / Rimuovi un giocatore assegnato per errore")
             idx_to_clear = st.session_state.rose[sq_err][ruolo_err].index(gioc_sel)
             st.session_state.rose[sq_err][ruolo_err][idx_to_clear] = ""
             st.session_state.crediti[sq_err] += prezzo_estratto
+            salva_stato_locale()
             st.success(f"Rimosso {gioc_sel} da {sq_err} e rimborsati {prezzo_estratto} crediti!")
             st.rerun()
 
 st.markdown("---")
 
-# --- COSTRUZIONE TABELLONE VISIVO ---
 st.subheader("📋 Tabellone Rose")
 
 table_data = []
