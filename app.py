@@ -6,7 +6,7 @@ import os
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction Master", page_icon="⚽", layout="wide")
 
 st.title("⚽ Tabellone Asta in Tempo Reale + Master Consulente Diretto")
-st.markdown("Consigli tattici secchi, gestione slot, crediti dinamici e indicazioni precise sui ballottaggi.")
+st.markdown("Consigli tattici secchi, gestione slot, crediti dinamici e indicazioni precise sui ballottaggi per ogni reparto.")
 
 # Caricamento del listone con cache
 @st.cache_data
@@ -123,7 +123,7 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# --- MOTORE MASTER DIRETTIVO E SENZA GIRI DI PAROLE ---
+# --- MOTORE MASTER DIRETTIVO ESTESO A TUTTI I RUOLI (INCLUSI ATTACCANTI) ---
 def master_analisi_diretta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
     slot_occupati = sum(1 for g in st.session_state.rose[sq_target][ruolo_gioc] if g != "")
     slot_totali = SLOT_CONFIG[ruolo_gioc]
@@ -150,8 +150,9 @@ def master_analisi_diretta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, p
         return (f"🚨 **FOLLIA PURA!** Stai offrendo {prezzo_inserito} crediti per un {ruolo_gioc} ({int((prezzo_inserito/budget_iniziale)*100)}% del budget). "
                 f"Prezzo fuori da ogni logica, bloccati subito!"), "warning"
 
-    # Mappa dei ballottaggi classici in Serie A per dare il nome esatto del rivale
+    # Mappa estesa dei ballottaggi (Centrocampo e Attacco)
     mappa_ballottaggi = {
+        # Centrocampisti
         "isaksen": "Zaccagni / Pedro / Tchaouna",
         "zaccagni": "Isaksen / Tchaouna",
         "frattesi": "Barella / Mkhitaryan / Zielinski",
@@ -159,13 +160,28 @@ def master_analisi_diretta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, p
         "colpani": "Maldini / Pessina",
         "fazzini": "Henderson / Zurkowski",
         "ndoye": "Orsolini / Karlsson",
-        "simeone": "Lukaku / Raspadori",
         "pulisic": "Chukwueze / Okafor",
         "leao": "Okafor",
         "yildiz": "Conceicao / Weah",
         "soule": "Dybala / Baldanzi",
         "de ketelaere": "Lookman / Retegui / Samardzic",
-        "samardzic": "Ederson / De Roon / Pasalic"
+        "samardzic": "Ederson / De Roon / Pasalic",
+        # Attaccanti
+        "simeone": "Lukaku / Raspadori",
+        "raspadori": "Lukaku / Simeone",
+        "taremi": "Lautaro / Thuram",
+        "arnautovic": "Lautaro / Thuram",
+        "jovic": "Abraham / Morata",
+        "abraham": "Morata / Jovic",
+        "morata": "Abraham / Jovic",
+        "castellanos": "Dia",
+        "dia": "Castellanos",
+        "caprari": "Djuric / Mota",
+        "mosquera": "Tengstedt / Livramento",
+        "lucca": "Davis / Brenner",
+        "sanabria": "Zapata / Adams",
+        "adams": "Zapata / Sanabria",
+        "chwueze": "Pulisic"
     }
     
     rivale_chiave = None
