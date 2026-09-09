@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Tool Fantacalcio - Live Auction", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Tool Fantacalcio - Live Auction Master", page_icon="⚽", layout="wide")
 
-st.title("⚽ Tabellone Asta in Tempo Reale + Consulente Smart")
-st.markdown("Gestione rose, crediti, assegnazione automatica e consigli statistici istantanei.")
+st.title("⚽ Tabellone Asta in Tempo Reale + Master Consulente")
+st.markdown("Gestione avanzata rose, crediti dinamici, analisi dell'andamento dell'asta e consigli tattici per ogni ruolo.")
 
 # Caricamento del listone con cache
 @st.cache_data
@@ -60,16 +60,26 @@ for sq_esistente in list(st.session_state.rose.keys()):
         if sq_esistente in st.session_state.crediti:
             del st.session_state.crediti[sq_esistente]
 
-# --- PANNELLO CREDITI RESIDUI NELLA SIDEBAR ---
+# --- PANNELLO CREDITI E ANDAMENTO ASTA NELLA SIDEBAR ---
 st.sidebar.markdown("---")
-st.sidebar.header("💰 Crediti Residui")
+st.sidebar.header("💰 Situazione Crediti & Asta")
+
+crediti_totali_lega = sum(st.session_state.crediti.values())
+budget_iniziale_totale = num_squadre * budget_iniziale
+crediti_spesi_totale = budget_iniziale_totale - crediti_totali_lega
+media_crediti_rimasti = crediti_totali_lega / num_squadre
+
+st.sidebar.markdown(f"**Media crediti residui per squadra:** `{int(media_crediti_rimasti)} cr`")
+st.sidebar.markdown(f"**Totale crediti spesi nella lega:** `{crediti_spesi_totale} cr`")
+st.sidebar.markdown("---")
+
 for sq in squadre:
     crediti_attuali = st.session_state.crediti.get(sq, budget_iniziale)
     spesi = budget_iniziale - crediti_attuali
     st.sidebar.text(f"{sq}: {crediti_attuali} cr (Spesi: {spesi})")
 
-# --- SEZIONE ASTA / ASSEGNAZIONE + CONSIGLI SMART ---
-st.subheader("🛒 Assegnazione Giocatore & Consulente Smart")
+# --- SEZIONE ASTA / ASSEGNAZIONE + MASTER CONSULENTE ---
+st.subheader("🛒 Assegnazione Giocatore & Master Consulente Tattico")
 col_search1, col_search2, col_search3, col_search4 = st.columns([2, 1, 1, 1])
 
 with col_search1:
@@ -91,24 +101,83 @@ with col_search4:
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
 
-# Funzione di calcolo automatico istantaneo (Senza limiti e senza API)
-def calcola_consiglio_smart(fvm, prezzo_pagato, crediti_rimasti):
-    diff = prezzo_pagato - fvm
-    if prezzo_pagato <= fvm * 0.8:
-        return f"🔥 **Grande Affare!** Pagato {prezzo_pagato} rispetto a un FVM di {fvm} (-{abs(diff)} cr). Ottimo colpo."
-    elif prezzo_pagato <= fvm * 1.1:
-        return f"👍 **Prezzo onesto.** In linea con il valore di mercato (FVM: {fvm})."
-    elif prezzo_pagato <= fvm * 1.4:
-        return f"⚠️ **Leggero Overpay.** Lo stai pagando un po' sopra il valore ({prezzo_pagato} vs {fvm} FVM). Occhio ai crediti rimasti ({crediti_rimasti} cr)."
-    else:
-        return f"🚨 **Overpay Pesante!** Prezzo decisamente alto rispetto al listone (+{diff} cr). Rischio di prosciugare il budget."
+# --- MOTORE MASTER DI ANALISI AVANZATA (RUOLO, ROSA E ANDAMENTO ASTA) ---
+def master_analisi_asta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
+    # Controllo quanti slot liberi ha la squadra in quel ruolo
+    slot_occupati = sum(1 for g in st.session_state.rose[sq_target][ruolo_gioc] if g != "")
+    slot_totali = SLOT_CONFIG[ruolo_gioc]
+    slot_rimasti = slot_totali - slot_occupati
+    
+    crediti_miei = st.session_state.crediti[sq_target]
+    
+    # Calcolo soglia d'affare in base all'andamento dell'asta (se la media crediti degli avversari si abbassa, i prezzi calano)
+    soglia_affare = fvm * 0.85
+    soglia_max = fvm * 1.25
+    
+    consiglio_colore = "info"
+    testo_consiglio = []
+    
+    # 1. Analisi di Ruolo e Rosa
+    if slot_rimasti <= 0:
+        return f"🚨 **Attenzione!** {sq_target} ha già completato tutti gli slot per il ruolo **{ruolo_gioc}**! Non puoi prenderlo a meno di svincolare qualcuno.", "error"
+    
+    testo_consiglio.append(f"📋 **Slot {ruolo_gioc} liberi per {sq_target}:** {slot_rimasti}/{slot_totali}.")
+    
+    # 2. Analisi Specifiche per Ruolo & Squadra
+    portieri_rosa = [g.split(" (")[0] for g in st.session_state.rose[sq_target]["P"] if g != ""]
+    if ruolo_gioc == "P":
+        squadre_portieri = [df_listone[df_listone["Nome"] == p].iloc[0]["Squadra"] for p in portieri_rosa if not df_listone[df_listone["Nome"] == p].empty]
+        if squadra_ita in squadre_portieri:
+            testo_consiglio.append(f"🔥 **COPERTURA PORTA:** Hai già il titolare del **{squadra_ita}**! Prenderlo ti blinda la porta al 100%. Consigliatissimo se preso a basso costo.")
+        else:
+            testo_consiglio.append(f"🧤 **Portiere singolo ({squadra_ita}).** Valuta la rotazione del calendario con i tuoi attuali portieri.")
+            
+    elif ruolo_gioc == "D":
+        if squadra_ita in ["Inter", "Juventus", "Milan", "Atalanta", "Napoli"]:
+            testo_consiglio.append(f"🛡️ **Top Difesa ({squadra_ita}):** Ottimale per il modificatore di difesa. Se pagato entro **{int(fvm * 1.15)} crediti** è un affare solido.")
+        else:
+            testo_consiglio.append(f"⚽ Difensore da bonus o titolare low-cost per completare il reparto.")
+            
+    elif ruolo_gioc == "C":
+        testo_consiglio.append(f"🎯 Centrocampista da modificatore/bonus. Monitora il budget: ti restano {crediti_miei} crediti.")
+        
+    elif ruolo_gioc == "A":
+        if fvm >= 100:
+            testo_consiglio.append(f"👑 **TOP ATTACCO:** Giocatore fondamentale. Gestisci bene il budget residuo ({crediti_miei} cr) perché gli slot avanzati pesano molto.")
+        else:
+            testo_consiglio.append(f"⚡ Scommessa o titolare di provincia per completare il tridente.")
 
-# Mostra il consiglio istantaneamente in base alle regole
+    # 3. Analisi del Prezzo rispetto all'Andamento dell'Asta
+    diff = prezzo_inserito - fvm
+    if prezzo_inserito <= soglia_affare:
+        testo_consiglio.append(f"💰 **GRANDE AFFARE!** Lo stai pagando {prezzo_inserito} rispetto a un FVM di {fvm} (-{abs(int(diff))} cr). Prendi al volo!")
+        consiglio_colore = "success"
+    elif prezzo_inserito <= soglia_max:
+        testo_consiglio.append(f"👍 **Prezzo onesto e in linea** con l'andamento della lega (FVM: {fvm}).")
+        consiglio_colore = "info"
+    else:
+        testo_consiglio.append(f"⚠️ **OVERPAY!** Lo stai pagando troppo rispetto al valore medio (+{int(diff)} cr). Con una media lega di {int(media_crediti_rimasti)} cr residui per squadra, rischi di rimanere corto.")
+        consiglio_colore = "warning"
+        
+    return " ".join(testo_consiglio), consiglio_colore
+
+# Mostra il consiglio dinamico in tempo reale
 if search_name:
-    crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
-    fvm_giocatore = float(selected_player_row['FVM'])
-    giudizio = calcola_consiglio_smart(fvm_giocatore, prezzo_pagato, crediti_rimasti_acquirente)
-    st.info(f"🤖 **Analisi Smart:** {giudizio}")
+    parere, tipo_box = master_analisi_asta(
+        squadra_acquirente, 
+        search_name, 
+        selected_player_row['Ruolo'], 
+        selected_player_row['Squadra'], 
+        float(selected_player_row['FVM']), 
+        prezzo_pagato
+    )
+    
+    if tipo_box == "success":
+        st.success(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
+    elif tipo_box == "warning":
+        st.warning(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
+    else:
+        st.info(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
