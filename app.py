@@ -16,14 +16,16 @@ def load_data():
 
 df_listone = load_data()
 
-# Configurazione Squadre e Budget nella Sidebar
+# Configurazione Dinamica Numero Partecipanti nella Sidebar
 st.sidebar.header("⚙️ Configurazione Lega")
-default_squadre = ["Fede", "Riky", "Gio", "Penno", "Ale", "Aldo", "Margy", "Lupo"]
+num_squadre = st.sidebar.slider("Numero di partecipanti", min_value=6, max_value=12, value=8)
 budget_iniziale = st.sidebar.number_input("Budget Iniziale per Squadra", value=500, step=50)
 
+default_names = ["Fede", "Riky", "Gio", "Penno", "Ale", "Aldo", "Margy", "Lupo", "Mago", "Kikko", "Bero", "Dandi"]
 squadre = []
-for i, nome_def in enumerate(default_squadre):
-    s = st.sidebar.text_input(f"Squadra {i+1}", value=nome_def)
+for i in range(num_squadre):
+    nome_def = default_names[i] if i < len(default_names) else f"Squadra {i+1}"
+    s = st.sidebar.text_input(f"Squadra {i+1}", value=nome_def, key=f"sq_{i}")
     squadre.append(s)
 
 # Struttura slot per ruolo
@@ -50,6 +52,13 @@ for sq in squadre:
         }
     if sq not in st.session_state.crediti:
         st.session_state.crediti[sq] = budget_iniziale
+
+# Pulizia delle squadre rimosse dallo stato se si riduce il numero
+for sq_esistente in list(st.session_state.rose.keys()):
+    if sq_esistente not in squadre:
+        del st.session_state.rose[sq_esistente]
+        if sq_esistente in st.session_state.crediti:
+            del st.session_state.crediti[sq_esistente]
 
 # --- PANNELLO CREDITI RESIDUI NELLA SIDEBAR ---
 st.sidebar.markdown("---")
@@ -86,11 +95,9 @@ if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
     nome_giocatore = f"{search_name} ({prezzo_pagato} cr)"
     
-    # Controlla se la squadra ha abbastanza crediti
     if st.session_state.crediti[squadra_acquirente] < prezzo_pagato:
         st.error(f"{squadra_acquirente} non ha abbastanza crediti residui!")
     else:
-        # Trova il primo slot libero per quel ruolo
         slot_trovato = False
         if ruolo in st.session_state.rose[squadra_acquirente]:
             for idx, slot_val in enumerate(st.session_state.rose[squadra_acquirente][ruolo]):
@@ -131,25 +138,21 @@ st.subheader("📋 Tabellone Rose")
 
 table_data = []
 
-# Header Portieri
 table_data.append(["--- PORTIERI ---"] * len(squadre))
 for i in range(SLOT_CONFIG["P"]):
     row = [st.session_state.rose[sq]["P"][i] for sq in squadre]
     table_data.append(row)
 
-# Header Difensori
 table_data.append(["--- DIFENSORI ---"] * len(squadre))
 for i in range(SLOT_CONFIG["D"]):
     row = [st.session_state.rose[sq]["D"][i] for sq in squadre]
     table_data.append(row)
 
-# Header Centrocampisti
 table_data.append(["--- CENTROCAMPISTI ---"] * len(squadre))
 for i in range(SLOT_CONFIG["C"]):
     row = [st.session_state.rose[sq]["C"][i] for sq in squadre]
     table_data.append(row)
 
-# Header Attaccanti
 table_data.append(["--- ATTACCANTI ---"] * len(squadre))
 for i in range(SLOT_CONFIG["A"]):
     row = [st.session_state.rose[sq]["A"][i] for sq in squadre]
