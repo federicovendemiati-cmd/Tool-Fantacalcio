@@ -15,8 +15,8 @@ ai_attiva = False
 if gemini_api_key:
     try:
         genai.configure(api_key=gemini_api_key)
-        # Usiamo il modello standard gemini-1.5-flash
-        ai_model = genai.GenerativeModel('gemini-1.5-flash')
+        # Aggiornato al modello standard corrente
+        ai_model = genai.GenerativeModel('gemini-2.0-flash')
         ai_attiva = True
     except Exception as e:
         st.sidebar.error(f"Errore configurazione API: {e}")
