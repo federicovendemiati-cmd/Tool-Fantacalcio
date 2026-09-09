@@ -5,8 +5,8 @@ import os
 
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction Master", page_icon="⚽", layout="wide")
 
-st.title("⚽ Tabellone Asta in Tempo Reale + Master Consulente Automatico")
-st.markdown("Gestione avanzata rose, crediti dinamici, analisi automatica dei ballottaggi e consigli tattici diretti.")
+st.title("⚽ Tabellone Asta in Tempo Reale + Master Consulente Reale")
+st.markdown("Gestione rose, crediti dinamici e analisi automatica basata sulle gerarchie e probabili formazioni reali della Serie A.")
 
 # Caricamento del listone con cache
 @st.cache_data
@@ -101,7 +101,7 @@ for sq in squadre:
     st.sidebar.text(f"{sq}: {crediti_attuali} cr (Spesi: {spesi})")
 
 # --- SEZIONE ASTA / ASSEGNAZIONE + MASTER CONSULENTE ---
-st.subheader("🛒 Assegnazione Giocatore & Master Consulente Automatico")
+st.subheader("🛒 Assegnazione Giocatore & Master Consulente Reale")
 col_search1, col_search2, col_search3, col_search4 = st.columns([2, 1, 1, 1])
 
 with col_search1:
@@ -121,10 +121,10 @@ with col_search3:
 with col_search4:
     st.text("") 
     st.text("")
-    assegna_btn = st.button("Assegna Giocatore", type="primary")
+    assegna_btn = st.button("Assegnazione Giocatore", type="primary")
 
-# --- MOTORE MASTER AUTOMATICO E DINAMICO ---
-def master_analisi_diretta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
+# --- MOTORE MASTER CON GERARCHIE E FORMAZIONI REALI ---
+def master_analisi_reale(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, prezzo_inserito):
     slot_occupati = sum(1 for g in st.session_state.rose[sq_target][ruolo_gioc] if g != "")
     slot_totali = SLOT_CONFIG[ruolo_gioc]
     slot_rimasti = slot_totali - slot_occupati
@@ -150,44 +150,50 @@ def master_analisi_diretta(sq_target, nome_gioc, ruolo_gioc, squadra_ita, fvm, p
         return (f"🚨 **FOLLIA PURA!** Stai offrendo {prezzo_inserito} crediti per un {ruolo_gioc} ({int((prezzo_inserito/budget_iniziale)*100)}% del budget). "
                 f"Prezzo fuori da ogni logica, bloccati subito!"), "warning"
 
-    # ANALISI AUTOMATICA DELLA CONCORRENZA NELLE BIG (Basata su FVM e Squadra)
-    squadre_big = ["Inter", "Milan", "Juventus", "Napoli", "Atalanta", "Roma", "Lazio"]
-    
-    # Estraiamo tutti i giocatori già presi da questa squadra nella rosa per incrociare i reparti
-    giocatori_gia_in_rosa = []
-    for r in ["P", "D", "C", "A"]:
-        for slot_g in st.session_state.rose[sq_target][r]:
-            if slot_g != "":
-                giocatori_gia_in_rosa.append(slot_g.split(" (")[0])
+    # Database integrato delle gerarchie e ballottaggi reali caldi nelle squadre di Serie A
+    # (Inserisci qui le chiavi dei giocatori per mappare esattamente la situazione reale)
+    gerarchie_reali = {
+        "bonny": "È riserva offensiva nell'Inter (chiuso da Lautaro, Thuram e Pio Esposito). Rischio minutaggio basso, valutane l'acquisto solo a pochissimi crediti.",
+        "taremi": "Prima alternativa offensiva dell'Inter. Vede spesso il campo ma parte spesso dietro la Thu-La.",
+        "frattesi": "Jolly di centrocampo nell'Inter, spesso arma a gara in corso o titolare in staffetta con Barella/Mkhitaryan.",
+        "isaksen": "In ballottaggio costante sulle fasce della Lazio. Richiede copertura.",
+        "castellanos": "Titolare nel duello offensivo della Lazio, ma gestito con rotazioni.",
+        "jovic": "Riserva offensiva nelle gerarchie del Milan.",
+        "simeone": "Vice Lukaku nel Napoli, minutaggio ridotto a meno di staffette o infortuni."
+    }
 
-    # Controllo automatico gerarchie se è un profilo economico in una big (rischio panchina stile Bonny/riserve)
-    if squadra_ita in squadre_big and fvm < 18 and ruolo_gioc in ["C", "A"]:
-        testo_consiglio.append(f"⚠️ **ATTENZIONE GERARCHIE / RISCHIO PANCHINA:** {nome_gioc} ha un FVM basso ({fvm}) pur giocando in una big ({squadra_ita}). Rischio concreto di essere chiuso da titolari intoccabili o di fare panchina fissa!")
-        consiglio_colore = "warning"
-
-    # Controllo automatico di coppia per la stessa squadra
-    compagni_stessa_squadra = [g for g in giocatori_gia_in_rosa if not df_listone[df_listone["Nome"] == g].empty and df_listone[df_listone["Nome"] == g].iloc[0]["Squadra"] == squadra_ita]
-    if compagni_stessa_squadra:
-        testo_consiglio.append(f"🔥 **GESTIONE COPPIA:** Hai già in rosa altri elementi del **{squadra_ita}** ({', '.join(compagni_stessa_squadra)}). Valuta se coprire il ballottaggio o evitare eccessivi affollamenti.")
+    # Controllo match nel database reale
+    gioc_lower = nome_gioc.lower()
+    match_reale = False
+    for chiave, info in gerarchie_reali.items():
+        if chiave in gioc_lower:
+            testo_consiglio.append(f"🔍 **SITUAZIONE REALE (PROBABILI FORMAZIONI):** {info}")
+            if "riserva" in info.lower() or "ridotto" in info.lower():
+                consiglio_colore = "warning"
+            match_reale = True
+            break
+            
+    if not match_reale and fvm < 15 and squadra_ita in ["Inter", "Milan", "Juventus", "Napoli", "Atalanta", "Roma", "Lazio"]:
+        testo_consiglio.append(f"⚠️ **ATTENZIONE FORMAZIONE:** Essendo un profilo economico ({fvm} FVM) in una big ({squadra_ita}), verifica bene se è un titolare o una riserva designata nelle probabili formazioni reali.")
 
     soglia_affare = min(fvm * 0.90, limite_assoluto_crediti * 0.6)
     soglia_max_onesta = min(fvm * 1.15, limite_assoluto_crediti * 0.85)
 
     if prezzo_inserito <= soglia_affare and consiglio_colore != "warning":
-        testo_consiglio.append(f"💰 **DA COMPRARE SUBITO:** Pagato {prezzo_inserito} (FVM {fvm}). Affare d'oro per la tua rosa, prendilo al volo.")
+        testo_consiglio.append(f"💰 **DA COMPRARE SUBITO:** Pagato {prezzo_inserito} (FVM {fvm}). Ottimo affare reale.")
         consiglio_colore = "success"
     elif prezzo_inserito <= soglia_max_onesta:
-        testo_consiglio.append(f"👍 **PREZZO CORRETTO:** A {prezzo_inserito} crediti ci sta tutto (FVM {fvm}). Acquisto sensato.")
+        testo_consiglio.append(f"👍 **PREZZO CORRETTO:** A {prezzo_inserito} crediti ci sta (FVM {fvm}).")
         if consiglio_colore != "warning":
             consiglio_colore = "info"
     else:
-        testo_consiglio.append(f"⚠️ **STAI SPENDENDO TROPPO:** A {prezzo_inserito} cr stai pagando un sovrapprezzo rispetto al FVM ({fvm}). Fermati se puoi.")
+        testo_consiglio.append(f"⚠️ **STAI SPENDENDO TROPPO:** A {prezzo_inserito} cr stai pagando un sovrapprezzo rispetto al FVM ({fvm}).")
         consiglio_colore = "warning"
         
     return " ".join(testo_consiglio), consiglio_colore
 
 if search_name:
-    parere, tipo_box = master_analisi_diretta(
+    parere, tipo_box = master_analisi_reale(
         squadra_acquirente, 
         search_name, 
         selected_player_row['Ruolo'], 
@@ -197,11 +203,11 @@ if search_name:
     )
     
     if tipo_box == "success":
-        st.success(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
+        st.success(f"🤖 **Master Consulente Reale ({squadra_acquirente}):** {parere}")
     elif tipo_box == "warning":
-        st.warning(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
+        st.warning(f"🤖 **Master Consulente Reale ({squadra_acquirente}):** {parere}")
     else:
-        st.info(f"🤖 **Master Consulente ({squadra_acquirente}):** {parere}")
+        st.info(f"🤖 **Master Consulente Reale ({squadra_acquirente}):** {parere}")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
