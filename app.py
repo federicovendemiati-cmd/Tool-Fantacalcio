@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import requests
-import json
+import google.generativeai as genai
 
 st.set_page_config(page_title="Tool Fantacalcio - Live Auction con IA", page_icon="⚽", layout="wide")
 
@@ -10,26 +9,17 @@ st.markdown("Gestione rose, crediti, assegnazione automatica e consigli strategi
 
 # Configurazione API IA nella Sidebar
 st.sidebar.header("🤖 Configurazione IA")
-gemini_api_key = st.sidebar.text_input("Inserisci Gemini API Key", type="password", help="Inserisci la tua chiave API di Google Gemini per attivare i consigli intelligenti.")
+gemini_api_key = st.sidebar.text_input("Inserisci Gemini API Key", type="password", help="Incolla qui la tua chiave API di Google Gemini.")
 
-# Funzione per chiamare l'IA via REST API (senza bisogno di librerie esterne pesanti)
-def chiedi_gemini(prompt, api_key):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        "contents": [{
-            "parts": [{"text": prompt}]
-        }]
-    }
+ai_attiva = False
+if gemini_api_key:
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(data), timeout=10)
-        if response.status_code == 200:
-            res_json = response.json()
-            return res_json['candidates'][0]['content']['parts'][0]['text']
-        else:
-            return f"Errore API (Codice {response.status_code}): Controlla che la chiave sia corretta."
+        genai.configure(api_key=gemini_api_key)
+        # Usiamo il modello standard gemini-1.5-flash
+        ai_model = genai.GenerativeModel('gemini-1.5-flash')
+        ai_attiva = True
     except Exception as e:
-        return f"Errore di connessione all'IA: {e}"
+        st.sidebar.error(f"Errore configurazione API: {e}")
 
 # Caricamento del listone
 @st.cache_data
@@ -120,7 +110,7 @@ with col_search4:
 # Box Consigli IA in tempo reale per il giocatore selezionato
 if search_name:
     with st.expander("🤖 Analisi e Consiglio IA su questo Giocatore", expanded=True):
-        if gemini_api_key:
+        if ai_attiva:
             with st.spinner("L'IA sta analizzando il giocatore e la situazione della lega..."):
                 crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
                 prompt = (
@@ -130,12 +120,15 @@ if search_name:
                     f"Prezzo guida consigliato: {selected_player_row['Prezzo']}. "
                     f"La squadra che lo sta acquistando ({squadra_acquirente}) ha ancora {crediti_rimasti_acquirente} crediti su {budget_iniziale} iniziali. "
                     f"Il prezzo inserito per l'asta è {prezzo_pagato} crediti. "
-                    f"Fai un'analisi breve e pungente (massimo 3-4 righe): conviene prenderlo a questo prezzo? È un affare o un furto/overpay? Che consigli dai a {squadra_acquirente}?"
+                    f"Fai un'analisi breve e pungente (massimo 3-4 righe): conviene prenderlo a questo prezzo? È un affare o un overpay? Che consigli dai a {squadra_acquirente}?"
                 )
-                consiglio = chiedi_gemini(prompt, gemini_api_key)
-                st.success(consiglio)
+                try:
+                    response = ai_model.generate_content(prompt)
+                    st.success(response.text)
+                except Exception as e:
+                    st.error(f"Errore durante la generazione della risposta IA: {e}")
         else:
-            st.info("💡 Inserisci la tua chiave API di Gemini nella barra laterale per sbloccare l'analisi e i consigli istantanei dell'IA sul giocatore selezionato.")
+            st.info("💡 Inserisci la tua chiave API di Gemini nella barra laterale per sbloccare l'analisi e i consigli istantanei dell'IA.")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
