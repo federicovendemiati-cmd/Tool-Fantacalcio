@@ -1,0 +1,532 @@
+Ruolo,Nome,Squadra,FVM,Prezzo
+P,Carnesecchi,Atalanta,55,17
+P,Sportiello,Atalanta,1,1
+D,Scalvini,Atalanta,28,10
+D,Zappacosta,Atalanta,19,8
+D,Hien,Atalanta,11,7
+D,Bellanova,Atalanta,17,6
+D,Bernasconi,Atalanta,18,6
+D,Kolasinac,Atalanta,8,6
+D,Kristensen T.,Atalanta,20,6
+D,Kossounou,Atalanta,12,4
+C,Samardzic,Atalanta,44,13
+C,Ederson D.S.,Atalanta,46,12
+C,Kessie,Atalanta,47,12
+C,Rowe,Atalanta,40,10
+C,Pasalic,Atalanta,22,8
+C,Elmas,Atalanta,22,7
+C,Gaetano,Atalanta,30,7
+C,Zalewski,Atalanta,18,7
+A,Scamacca,Atalanta,110,19
+A,Krstovic,Atalanta,98,18
+A,De Ketelaere,Atalanta,95,17
+A,Raspadori,Atalanta,73,14
+A,Sulemana K.,Atalanta,8,6
+P,Skorupski,Bologna,32,10
+P,Happonen,Bologna,1,1
+P,Pessina Mas.,Bologna,1,1
+D,Miranda J.,Bologna,23,8
+D,Theate,Bologna,20,8
+D,Zortea,Bologna,19,7
+D,Heggem,Bologna,15,6
+D,Holm,Bologna,13,6
+D,Vitik,Bologna,10,4
+D,Casale,Bologna,5,3
+D,Helland,Bologna,12,3
+D,Alhassane,Bologna,6,2
+D,De Silvestri,Bologna,4,1
+C,Orsolini,Bologna,177,25
+C,Bernardeschi,Bologna,27,10
+C,Cambiaghi,Bologna,25,8
+C,Mbangula,Bologna,28,8
+C,Odgaard,Bologna,17,8
+C,Ferguson,Bologna,23,7
+C,Pobega,Bologna,12,6
+C,Amondarain,Bologna,10,5
+C,Moro N.,Bologna,14,4
+C,El Azzouzi O.,Bologna,10,2
+A,Dovbyk,Bologna,51,15
+A,Piccoli,Bologna,29,8
+P,Caprile,Cagliari,25,10
+P,Radunovic,Cagliari,1,1
+P,Sherri,Cagliari,1,1
+D,Mina,Cagliari,20,7
+D,Obert,Cagliari,15,7
+D,Sugawara,Cagliari,15,6
+D,Kofler,Cagliari,8,5
+D,Zé Pedro,Cagliari,13,5
+D,Rodriguez Ju.,Cagliari,14,4
+D,Idrissi R.,Cagliari,3,3
+D,Aurelio,Cagliari,5,2
+C,Adopo,Cagliari,13,7
+C,Romano,Cagliari,21,7
+C,Fazzini,Cagliari,23,6
+C,Winks,Cagliari,15,6
+C,Felici,Cagliari,7,5
+C,Massolin,Cagliari,12,4
+C,Deiola,Cagliari,8,3
+C,Gagliardini,Cagliari,8,3
+C,Fadera,Cagliari,12,2
+C,Ciervo,Cagliari,1,1
+C,Liteta,Cagliari,1,1
+A,Kevin Carlos,Cagliari,36,12
+A,Maldini,Cagliari,21,5
+A,Borrelli,Cagliari,9,4
+A,Mendy P.,Cagliari,12,4
+A,Nzola,Cagliari,10,4
+A,Trepy,Cagliari,2,1
+P,Butez,Como,50,15
+P,Sanchez Ro.,Como,25,8
+P,Vigorito,Como,1,1
+D,Chalobah T.,Como,32,10
+D,Ramon,Como,31,10
+D,Couto,Como,25,8
+D,Kaiki,Como,13,6
+D,Valle,Como,21,6
+D,Kempf,Como,13,5
+D,Smolcic I.,Como,10,4
+D,Kambwala,Como,8,3
+D,Goldaniga,Como,1,1
+C,Paz N.,Como,245,29
+C,Baturina,Como,105,20
+C,Da Cunha,Como,87,18
+C,Rodriguez Je.,Como,31,11
+C,Perrone,Como,34,10
+C,Caqueret,Como,17,6
+C,Liberali,Como,21,6
+C,Milla,Como,30,6
+C,Addai,Como,10,4
+C,Ricci S.,Como,12,4
+C,Lahdo,Como,1,1
+A,Kean,Como,183,24
+A,Douvikas,Como,185,22
+A,Diao,Como,50,12
+P,De Gea,Fiorentina,30,11
+P,Christensen O.,Fiorentina,1,1
+P,Lezzerini,Fiorentina,1,1
+D,Dodo,Fiorentina,20,9
+D,Dragusin,Fiorentina,20,7
+D,Jimenez A.,Fiorentina,18,7
+D,Viery,Fiorentina,12,6
+D,Valdepenas,Fiorentina,16,5
+D,Parisi,Fiorentina,10,4
+D,Pongracic,Fiorentina,8,4
+D,Joao Mario,Fiorentina,12,3
+D,Ranieri L.,Fiorentina,10,3
+C,Atta,Fiorentina,78,15
+C,Goncalves P.,Fiorentina,50,12
+C,Mastantuono,Fiorentina,50,11
+C,Fagioli,Fiorentina,20,7
+C,Ndour,Fiorentina,22,7
+C,Oulai,Fiorentina,18,6
+C,Njie,Fiorentina,28,4
+C,Brescianini,Fiorentina,11,3
+A,Beto,Fiorentina,50,14
+A,Pellegrino M.,Fiorentina,40,14
+A,Gnonto,Fiorentina,25,7
+P,Palmisani,Frosinone,12,5
+P,Desplanches,Frosinone,1,2
+P,Lolic,Frosinone,1,1
+P,Pisseri,Frosinone,1,1
+D,Bracaglia,Frosinone,15,7
+D,Monterisi,Frosinone,13,6
+D,Oyono A.,Frosinone,10,6
+D,Calvani,Frosinone,13,5
+D,Cittadini,Frosinone,8,4
+D,Terzic,Frosinone,8,4
+D,Akpoguma,Frosinone,6,3
+D,Tchato,Frosinone,8,3
+D,Amey,Frosinone,1,1
+D,Corrado,Frosinone,1,1
+D,Omar Fayed,Frosinone,1,1
+C,Calò,Frosinone,27,8
+C,Schmid,Frosinone,25,8
+C,Zerbin,Frosinone,12,6
+C,Cichella,Frosinone,12,4
+C,Fini,Frosinone,13,4
+C,Grillitsch,Frosinone,10,4
+C,Koutsoupias,Frosinone,11,4
+C,Gelli F.,Frosinone,6,3
+C,Masini,Frosinone,8,3
+C,Hasa,Frosinone,5,2
+C,El Azzouzi A.,Frosinone,1,1
+C,Kone B.,Frosinone,3,1
+A,Bobcek,Frosinone,9,3
+A,Raimondo,Frosinone,27,9
+A,Ghedjemis,Frosinone,23,8
+A,Kvernadze,Frosinone,24,6
+A,Birligea,Frosinone,11,5
+P,Bijlow,Genoa,15,8
+P,Sommariva,Genoa,1,1
+P,Stolz,Genoa,1,1
+D,Ostigard,Genoa,41,11
+D,Vasquez,Genoa,30,9
+D,Marcandalli,Genoa,14,6
+D,Mita,Genoa,10,4
+D,Drameh,Genoa,10,3
+D,Otoa,Genoa,5,2
+D,Puczka,Genoa,3,2
+D,Sabelli,Genoa,5,2
+C,Baldanzi,Genoa,28,11
+C,El Shaarawy,Genoa,25,7
+C,Frendrup,Genoa,19,7
+C,Sow,Genoa,15,7
+C,Ellertsson,Genoa,16,6
+C,Meichtry,Genoa,11,5
+C,Amorim,Genoa,11,4
+C,Messias,Genoa,8,4
+C,Traore Hj.,Genoa,11,4
+C,Venturino,Genoa,4,2
+A,Colombo,Genoa,52,11
+A,Osmajic,Genoa,28,8
+A,Vitinha O.,Genoa,13,8
+A,Havel,Genoa,5,4
+A,Robinho Junior,Genoa,3,1
+P,Martinez Jo.,Inter,68,17
+P,Provedel,Inter,5,2
+P,Di Gennaro,Inter,1,1
+D,Dimarco,Inter,240,31
+D,Akanji,Inter,47,15
+D,Bastoni,Inter,43,14
+D,Bisseck,Inter,36,12
+D,Stones,Inter,25,12
+D,Spence,Inter,37,11
+D,Carlos Augusto,Inter,20,6
+D,Pavard,Inter,14,6
+C,Calhanoglu,Inter,243,28
+C,Barella,Inter,81,18
+C,Jones C.,Inter,47,12
+C,Zielinski,Inter,45,12
+C,Diouf,Inter,43,9
+C,Sucic P,Inter,21,9
+C,Luis Henrique,Inter,12,5
+C,Mkhitaryan,Inter,9,4
+C,Stankovic A.,Inter,7,3
+A,Martinez L.,Inter,361,33
+A,Thuram,Inter,249,28
+A,Esposito F.P.,Inter,105,17
+A,Bonny,Inter,15,7
+P,Vicario,Juventus,70,17
+P,Grabara,Juventus,1,1
+P,Pinsoglio,Juventus,1,1
+D,Bremer,Juventus,60,16
+D,Kalulu,Juventus,47,14
+D,Cambiaso,Juventus,18,8
+D,Celik,Juventus,16,8
+D,Lucumi,Juventus,17,7
+D,Kelly L.,Juventus,12,5
+D,Gatti,Juventus,10,4
+D,Cabal,Juventus,4,1
+D,Rugani,Juventus,3,1
+C,Mckennie,Juventus,70,17
+C,Conceicao,Juventus,68,13
+C,Gonzalez N.,Juventus,45,12
+C,Alajbegovic,Juventus,42,11
+C,Locatelli,Juventus,33,9
+C,Thuram K.,Juventus,25,9
+C,Koopmeiners,Juventus,15,7
+C,Sarr P.,Juventus,25,7
+C,Zhegrova,Juventus,17,6
+C,Douglas Luiz,Juventus,15,4
+A,Kolo Muani,Juventus,165,25
+A,Woltemade,Juventus,160,23
+A,Yildiz,Juventus,100,22
+A,Boga,Juventus,27,7
+A,Milik,Juventus,10,4
+A,Ekhator,Juventus,10,3
+P,Mandas,Lazio,36,10
+P,Motta,Lazio,1,1
+P,Renzetti,Lazio,1,1
+D,Doekhi,Lazio,16,8
+D,Sutalo J.,Lazio,19,7
+D,Tavares N.,Lazio,25,7
+D,Marusic,Lazio,20,6
+D,Pedraza,Lazio,14,6
+D,Romagnoli,Lazio,20,6
+D,Floriani Mussolini,Lazio,10,4
+D,Provstgaard,Lazio,13,4
+D,Lazzari,Lazio,5,2
+D,Pellegrini Lu.,Lazio,7,2
+D,Patric,Lazio,1,1
+C,Zaccagni,Lazio,87,16
+C,Taylor K.,Lazio,53,13
+C,Gudmundsson A,Lazio,40,12
+C,Frattesi,Lazio,75,10
+C,Cancellieri,Lazio,25,9
+C,Isaksen,Lazio,22,9
+C,Rovella,Lazio,16,7
+C,Dele-Bashiru,Lazio,13,5
+C,Belahyane,Lazio,3,2
+C,Przyborek,Lazio,5,1
+A,Pinamonti,Lazio,53,12
+A,Noslin,Lazio,8,6
+P,Falcone,Lecce,26,8
+P,Bleve,Lecce,1,1
+P,Penev,Lecce,1,1
+D,Tiago Gabriel,Lecce,20,8
+D,Gallo,Lecce,12,6
+D,Veiga D.,Lecce,12,6
+D,Gaspar K.,Lecce,12,5
+D,Siebert,Lecce,12,4
+D,Jean,Lecce,4,2
+D,Ndaba,Lecce,5,2
+D,Dembelė A.,Lecce,2,1
+C,Coulibaly L.,Lecce,17,7
+C,Monteiro J.,Lecce,23,7
+C,Pierotti,Lecce,19,6
+C,Berisha M.,Lecce,12,4
+C,Gandelman,Lecce,10,4
+C,Ngom,Lecce,12,4
+C,Gorter,Lecce,12,3
+C,Maleh,Lecce,7,3
+C,Fofana Sa.,Lecce,1,1
+C,Ilic,Lecce,10,1
+C,Kaba,Lecce,2,1
+C,Laerke,Lecce,1,1
+A,Geubbels,Lecce,23,8
+A,Stulic,Lecce,11,6
+A,Fatah,Lecce,14,4
+A,N'Dri,Lecce,12,4
+P,Maignan,Milan,52,15
+P,Terracciano,Milan,1,1
+P,Torriani,Milan,1,1
+D,Pavlovic,Milan,49,14
+D,Gila,Milan,31,13
+D,Bartesaghi,Milan,22,8
+D,Gabbia,Milan,15,7
+D,Tomori,Milan,8,6
+D,De Winter,Milan,20,5
+D,Estupinan,Milan,13,3
+D,Diawara S.,Milan,4,2
+D,Terracciano F.,Milan,4,2
+C,Pulisic,Milan,150,24
+C,Rabiot,Milan,145,23
+C,Modric,Milan,45,12
+C,Moreira,Milan,45,11
+C,Saelemaekers,Milan,35,11
+C,Chukwueze,Milan,22,8
+C,Hutchinson,Milan,25,8
+C,Cissé A.,Milan,24,5
+C,Jashari,Milan,13,5
+C,Loftus-Cheek,Milan,16,4
+C,Musah,Milan,15,3
+C,Comotto,Milan,1,1
+A,Ramos G.,Milan,237,27
+A,Camarda,Milan,20,4
+P,Thiam,Monza,5,4
+P,Strajnar,Monza,1,1
+P,Tornqvist,Monza,10,1
+D,Mangas,Monza,15,7
+D,Birindelli,Monza,12,4
+D,Carboni A.,Monza,9,3
+D,Kouadio,Monza,14,3
+D,Lucchesi,Monza,11,3
+D,Bakoune,Monza,4,2
+D,Goglichidze,Monza,5,2
+D,Antov,Monza,2,1
+D,Maye,Monza,1,1
+D,Ziolkowski,Monza,8,1
+C,Colpani,Monza,15,9
+C,Akinsanmiro,Monza,11,7
+C,Pessina,Monza,15,6
+C,Tourè I.,Monza,14,6
+C,Folorunsho,Monza,17,4
+C,Colombo L.,Monza,4,3
+C,Ciurria,Monza,6,2
+C,Foe Ondoa,Monza,2,2
+C,Forson O.,Monza,1,2
+C,Mout,Monza,12,1
+A,Cutrone,Monza,23,9
+A,Varela G.,Monza,40,7
+A,Zeballos,Monza,18,6
+A,Ngonge,Monza,13,5
+A,Mota,Monza,8,4
+A,Robinson J.,Monza,5,4
+P,Meret,Napoli,48,11
+P,Milinkovic-Savic V.,Napoli,5,5
+P,Contini,Napoli,1,1
+D,Rrahmani,Napoli,51,15
+D,Di Lorenzo,Napoli,39,12
+D,Spinazzola,Napoli,25,8
+D,Badiashile,Napoli,18,7
+D,Beukema,Napoli,12,6
+D,Buongiorno,Napoli,15,6
+D,Olivera,Napoli,13,5
+D,Favasuli,Napoli,11,4
+D,Marin R.,Napoli,8,2
+D,Marianucci,Napoli,3,1
+C,Mctominay,Napoli,220,27
+C,De Bruyne,Napoli,108,17
+C,Vergara,Napoli,35,10
+C,Zambo Anguissa,Napoli,41,10
+C,Politano,Napoli,37,9
+C,Lobotka,Napoli,23,8
+C,Gilmour,Napoli,10,3
+A,Hojlund,Napoli,260,28
+A,Santos A.,Napoli,61,14
+A,Neres,Napoli,20,6
+A,Giovane,Napoli,7,4
+A,Lang,Napoli,14,4
+A,Lucca,Napoli,12,4
+P,Daffara,Parma,7,6
+P,Corvi,Parma,10,2
+P,Ghidotti,Parma,1,1
+D,Delprato,Parma,21,8
+D,Diego Carlos,Parma,26,8
+D,Valeri,Parma,22,8
+D,Valenti,Parma,10,4
+D,Britschgi,Parma,10,3
+D,Troilo,Parma,14,3
+D,Drobnic,Parma,1,2
+D,Ndiaye,Parma,8,2
+D,Carboni F.,Parma,3,1
+C,Bernabe,Parma,34,7
+C,Nicolussi Caviglia,Parma,16,6
+C,Keita M.,Parma,15,5
+C,Almqvist,Parma,11,4
+C,Fabbian,Parma,8,4
+C,Diallo O,Parma,12,3
+C,Ordonez C.,Parma,10,3
+C,Cremaschi,Parma,3,2
+A,Romero D.,Parma,37,10
+A,Touré E.,Parma,37,10
+A,Frigan,Parma,6,4
+A,Elphege,Parma,11,3
+A,Lontani,Parma,11,3
+A,De Martis,Parma,1,1
+P,Svilar,Roma,85,19
+P,De Marzi,Roma,1,1
+P,Gollini,Roma,1,1
+D,Molina N.,Roma,78,18
+D,Wesley,Roma,87,18
+D,Mancini,Roma,50,16
+D,N'Dicka,Roma,42,13
+D,Hermoso,Roma,26,11
+D,Koulierakis,Roma,15,8
+D,Balerdi,Roma,11,6
+D,Ghilardi,Roma,10,5
+D,Rensch,Roma,14,4
+D,Lulli,Roma,10,2
+C,Mora,Roma,100,20
+C,Konė M.,Roma,42,10
+C,Cristante,Roma,29,9
+C,Pellegrini Lo.,Roma,20,9
+C,Pisilli,Roma,19,7
+C,De Roon,Roma,10,4
+A,Malen,Roma,450,38
+A,Dybala,Roma,100,16
+A,Castro S.,Roma,70,14
+A,Soulè,Roma,48,13
+P,Muric,Sassuolo,15,7
+P,Russo A.,Sassuolo,1,1
+P,Satalino,Sassuolo,1,1
+P,Turati,Sassuolo,1,1
+D,Idzes,Sassuolo,19,7
+D,Caleta-Car,Sassuolo,15,6
+D,Leysen F.,Sassuolo,12,6
+D,Obrador,Sassuolo,13,6
+D,Doig,Sassuolo,10,5
+D,Walukiewicz,Sassuolo,10,4
+D,Candè,Sassuolo,7,3
+D,Odenthal,Sassuolo,8,3
+D,Cinquegrano,Sassuolo,4,2
+D,Van Der Brempt,Sassuolo,11,2
+D,Pieragnolo,Sassuolo,1,1
+C,Thorstvedt,Sassuolo,39,10
+C,Volpato,Sassuolo,25,9
+C,Konė L,Sassuolo,20,8
+C,Adzic,Sassuolo,16,6
+C,Bakola,Sassuolo,14,6
+C,Matic,Sassuolo,15,6
+C,Dominguez B.,Sassuolo,12,4
+C,Sulemana I.,Sassuolo,7,3
+C,Boloca,Sassuolo,5,2
+C,Lipani,Sassuolo,5,2
+A,Berardi,Sassuolo,106,19
+A,Laurientè,Sassuolo,83,15
+A,Esposito Se.,Sassuolo,40,12
+A,Bowie,Sassuolo,32,9
+P,Perri,Torino,26,9
+P,Mascardi,Torino,5,1
+P,Paleari,Torino,1,1
+P,Siviero,Torino,1,1
+D,Comuzzo,Torino,13,8
+D,Belghali,Torino,20,7
+D,Coco,Torino,14,7
+D,Ismajli,Torino,13,7
+D,Fortini,Torino,12,6
+D,Patterson,Torino,12,5
+D,Comert,Torino,12,4
+D,Biraghi,Torino,5,2
+C,Vlasic,Torino,73,13
+C,Casadei,Torino,27,9
+C,Mandragora,Torino,23,8
+C,Braganca,Torino,20,6
+C,Cacciamani,Torino,24,6
+C,Oristanio,Torino,12,6
+C,Fitz-Jim,Torino,18,5
+C,Gineitis,Torino,12,5
+C,Ilkhan,Torino,8,4
+C,Aboukhlal,Torino,5,3
+C,Anjorin,Torino,4,1
+A,Simeone,Torino,80,14
+A,Adams C.,Torino,33,10
+A,Zapata D.,Torino,12,6
+A,Kulenovic,Torino,9,4
+P,Okoye,Udinese,28,9
+P,Mrozek,Udinese,1,1
+P,Padelli,Udinese,1,1
+P,Piana,Udinese,1,1
+D,Solet,Udinese,46,13
+D,Kamara H.,Udinese,12,9
+D,Vojvoda,Udinese,19,9
+D,Arizala,Udinese,8,4
+D,Bertola,Udinese,10,4
+D,Kabasele,Udinese,12,4
+D,Zanoli,Udinese,10,4
+D,Ebosse,Udinese,5,3
+D,Palma,Udinese,11,3
+D,Abankwah,Udinese,10,2
+C,Zaniolo,Udinese,80,18
+C,Ekkelenkamp,Udinese,57,12
+C,Karlstrom,Udinese,20,7
+C,Unai Gomez,Udinese,16,7
+C,Piotrowski,Udinese,15,6
+C,Miller L.,Udinese,12,4
+C,Chakvetadze,Udinese,6,2
+C,Jovanovic,Udinese,5,2
+C,Zarraga,Udinese,4,2
+A,Davis K.,Udinese,108,19
+A,Gueye,Udinese,7,4
+A,Bayo V,Udinese,3,1
+P,Stankovic F.,Venezia,11,6
+P,Grandi,Venezia,1,1
+P,Montipo,Venezia,1,1
+P,Pozzi,Venezia,1,1
+D,Bella-Kotchap,Venezia,13,5
+D,Correia T.,Venezia,12,5
+D,Haps,Venezia,10,5
+D,Hainaut,Venezia,12,4
+D,Juan Jesus,Venezia,10,4
+D,Moreno M.,Venezia,6,4
+D,Franjic,Venezia,7,3
+D,Halhal,Venezia,10,3
+D,Schingtienne,Venezia,10,3
+D,Sverko,Venezia,7,3
+D,Sagrado,Venezia,4,2
+D,Gomes,Venezia,1,1
+D,Mazzocchi,Venezia,10,1
+C,Basic,Venezia,19,6
+C,Busio,Venezia,14,5
+C,Perez K.,Venezia,15,5
+C,Sohm,Venezia,11,5
+C,Fernandez T.,Venezia,8,3
+C,Helgason,Venezia,3,3
+C,Duncan,Venezia,4,2
+C,Dagasso,Venezia,1,1
+A,Adams A.,Venezia,35,11
+A,Yeboah J.,Venezia,27,9
+A,Rrahmani Al,Venezia,13,7
+A,Adorante,Venezia,8,4
+A,Lauberbach,Venezia,1,1
+A,Lisman,Venezia,1,1
