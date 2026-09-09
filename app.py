@@ -1,10 +1,24 @@
 import streamlit as st
 import pandas as pd
+import google.generativeai as genai
 
-st.set_page_config(page_title="Tool Fantacalcio - Live Auction", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Tool Fantacalcio - Live Auction con IA", page_icon="⚽", layout="wide")
 
-st.title("⚽ Tabellone Asta in Tempo Reale")
-st.markdown("Gestione rose, crediti e assegnazione automatica dei giocatori.")
+st.title("⚽ Tabellone Asta in Tempo Reale + Consulente IA")
+st.markdown("Gestione rose, crediti, assegnazione automatica e consigli strategici in tempo reale.")
+
+# Configurazione API IA nella Sidebar
+st.sidebar.header("🤖 Configurazione IA")
+gemini_api_key = st.sidebar.text_input("Inserisci Gemini API Key", type="password", help="Inserisci la tua chiave API di Google Gemini per attivare i consigli intelligenti.")
+
+if gemini_api_key:
+    genai.configure(api_key=gemini_api_key)
+    # Usiamo il modello standard flash per risposte fulminee durante l'asta
+    ai_model = genai.GenerativeModel('gemini-1.5-flash')
+    ai_attiva = True
+else:
+    ai_attiva = False
+    st.sidebar.info("💡 Inserisci la API Key per attivare i consigli dell'IA durante l'asta.")
 
 # Caricamento del listone
 @st.cache_data
@@ -17,6 +31,7 @@ def load_data():
 df_listone = load_data()
 
 # Configurazione Dinamica Numero Partecipanti nella Sidebar
+st.sidebar.markdown("---")
 st.sidebar.header("⚙️ Configurazione Lega")
 num_squadre = st.sidebar.slider("Numero di partecipanti", min_value=6, max_value=12, value=8)
 budget_iniziale = st.sidebar.number_input("Budget Iniziale per Squadra", value=500, step=50)
@@ -68,8 +83,8 @@ for sq in squadre:
     spesi = budget_iniziale - crediti_attuali
     st.sidebar.text(f"{sq}: {crediti_attuali} cr (Spesi: {spesi})")
 
-# --- SEZIONE ASTA / ASSEGNAZIONE ---
-st.subheader("🛒 Assegnazione Giocatore")
+# --- SEZIONE ASTA / ASSEGNAZIONE + CONSIGLI IA ---
+st.subheader("🛒 Assegnazione Giocatore & Consulente IA")
 col_search1, col_search2, col_search3, col_search4 = st.columns([2, 1, 1, 1])
 
 with col_search1:
@@ -90,6 +105,28 @@ with col_search4:
     st.text("") 
     st.text("")
     assegna_btn = st.button("Assegna Giocatore", type="primary")
+
+# Box Consigli IA in tempo reale per il giocatore selezionato
+if search_name and ai_attiva:
+    with st.expander("🤖 Analisi e Consiglio IA su questo Giocatore", expanded=True):
+        with st.spinner("L'IA sta analizzando il giocatore e la situazione della lega..."):
+            crediti_rimasti_acquirente = st.session_state.crediti[squadra_acquirente]
+            prompt = (
+                f"Sei un esperto di Fantacalcio italiano. Stiamo facendo l'asta. "
+                f"Il giocatore selezionato è {search_name}, Ruolo: {selected_player_row['Ruolo']}, "
+                f"Squadra Serie A: {selected_player_row['Squadra']}, FVM: {selected_player_row['FVM']}, "
+                f"Prezzo guida consigliato: {selected_player_row['Prezzo']}. "
+                f"La squadra che lo sta acquistando ({squadra_acquirente}) ha ancora {crediti_rimasti_acquirente} crediti su {budget_iniziale} iniziali. "
+                f"Il prezzo inserito per l'asta è {prezzo_pagato} crediti. "
+                f"Fai un'analisi breve e pungente (massimo 3-4 righe): conviene prenderlo a questo prezzo? È un affare o un furto/overpay? Che consigli dai a {squadra_acquirente}?"
+            )
+            try:
+                response = ai_model.generate_content(prompt)
+                st.success(response.text)
+            except Exception as e:
+                st.error(f"Errore nella generazione del consiglio IA: {e}")
+elif search_name and not ai_attiva:
+        st.info("💡 Inserisci la chiave API di Gemini nella barra laterale per ricevere analisi e consigli istantanei sul giocatore.")
 
 if assegna_btn and search_name:
     ruolo = selected_player_row['Ruolo']
